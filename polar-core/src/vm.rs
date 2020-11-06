@@ -1430,7 +1430,7 @@ impl PolarVirtualMachine {
             }
             Operator::In => {
                 assert_eq!(args.len(), 2);
-                let item = &args[0];
+                let item = self.deref(&args[0]);
                 let iterable = self.deref(&args[1]);
                 match iterable.value() {
                     Value::List(list) if list.is_empty() => {
@@ -1447,13 +1447,12 @@ impl PolarVirtualMachine {
                     }
                     Value::List(terms) => {
                         // Unify item with each element of the list, skipping non-matching ground terms.
-                        let x = self.deref(item);
-                        let v = x.value();
-                        let g = v.is_ground();
+                        let value = item.value();
+                        let is_ground = value.is_ground();
                         self.choose(
                             terms
                                 .iter()
-                                .filter(|term| !g || !term.is_ground() || term.value() == v)
+                                .filter(|term| !is_ground || !term.is_ground() || term.value() == value)
                                 .map(|term| {
                                     vec![Goal::Unify {
                                         left: item.clone(),
@@ -1465,9 +1464,8 @@ impl PolarVirtualMachine {
                     }
                     Value::Dictionary(dict) => {
                         // Unify item with each (k, v) pair of the dict, skipping non-matching ground terms.
-                        let x = self.deref(item);
-                        let v = x.value();
-                        let g = v.is_ground();
+                        let value = item.value();
+                        let is_ground = value.is_ground();
                         self.choose(
                             dict.fields
                                 .iter()
@@ -1477,7 +1475,7 @@ impl PolarVirtualMachine {
                                         v.clone(),
                                     ]))
                                 })
-                                .filter(|term| !g || !term.is_ground() || term.value() == v)
+                                .filter(|term| !is_ground || !term.is_ground() || term.value() == value)
                                 .map(|term| {
                                     vec![Goal::Unify {
                                         left: item.clone(),
@@ -1489,14 +1487,13 @@ impl PolarVirtualMachine {
                     }
                     Value::String(s) => {
                         // Unify item with each element of the string
-                        let x = self.deref(item);
-                        let v = x.value();
-                        let g = v.is_ground();
+                        let value = item.value();
+                        let is_ground = value.is_ground();
                         self.choose(
                             s.chars()
                                 .map(|c| c.to_string())
                                 .map(Value::String)
-                                .filter(|c| !g || term.value() == c)
+                                .filter(|c| !is_ground || term.value() == c)
                                 .map(|c| {
                                     vec![Goal::Unify {
                                         left: item.clone(),
@@ -1524,6 +1521,20 @@ impl PolarVirtualMachine {
                                 right: item.clone(),
                             },
                         ])?;
+                    }
+                    Value::Partial(partial) => {
+                        let mut partial = partial.clone();
+                        if item.is_ground() {
+                            partial.contains(item.clone());
+                            self.bind(&partial.name().clone(), partial.into_term());
+                        } else {
+                            let item_partial = partial.in_(item.clone());
+                            self.bind(
+                                &item_partial.value().as_partial().unwrap().name().clone(),
+                                item_partial,
+                            );
+                            self.bind(partial.name(), partial.clone().into_term());
+                        }
                     }
                     _ => {
                         return Err(self.type_error(
