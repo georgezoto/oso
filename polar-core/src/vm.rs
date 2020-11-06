@@ -1420,7 +1420,7 @@ impl PolarVirtualMachine {
             }
             Operator::In => {
                 assert_eq!(args.len(), 2);
-                let item = &args[0];
+                let item = self.deref(&args[0]);
                 let list = self.deref(&args[1]);
                 match list.value() {
                     Value::List(list) if list.is_empty() => {
@@ -1429,7 +1429,7 @@ impl PolarVirtualMachine {
                     }
                     Value::List(terms) => {
                         // Unify item with each element of the list, skipping non-matching ground terms.
-                        let x = self.deref(item);
+                        let x = item;
                         let v = x.value();
                         let g = v.is_ground();
                         self.choose(
@@ -1438,12 +1438,26 @@ impl PolarVirtualMachine {
                                 .filter(|term| !g || !term.is_ground() || term.value() == v)
                                 .map(|term| {
                                     vec![Goal::Unify {
-                                        left: item.clone(),
+                                        left: x.clone(),
                                         right: term.clone(),
                                     }]
                                 })
                                 .collect::<Vec<Goals>>(),
                         )?;
+                    }
+                    Value::Partial(partial) => {
+                        let mut partial = partial.clone();
+                        if item.is_ground() {
+                            partial.contains(item.clone());
+                            self.bind(&partial.name().clone(), partial.into_term());
+                        } else {
+                            let item_partial = partial.in_(item.clone());
+                            self.bind(
+                                &item_partial.value().as_partial().unwrap().name().clone(),
+                                item_partial,
+                            );
+                            self.bind(partial.name(), partial.clone().into_term());
+                        }
                     }
                     _ => {
                         return Err(self.type_error(
