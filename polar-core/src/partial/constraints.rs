@@ -115,8 +115,6 @@ impl Constraints {
     ///
     /// `other` must be a partial or a variable.
     ///
-    /// OTHER in THIS
-    ///
     /// Returns: A new partial to use for additional constraints on `other`.
     pub fn in_(&mut self, other: Term) -> Term {
         let name = match other.value() {
