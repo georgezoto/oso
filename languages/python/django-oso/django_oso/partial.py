@@ -47,6 +47,7 @@ COMPARISONS = {
     "Lt": lambda q, f, v: Q(**{f"{f}__lt": v}),
 }
 
+
 def translate_expr(expression, type_name):
     """Return translated expression, or None if the constraint doesn't translate to anything."""
     assert isinstance(expression, Expression)
@@ -58,15 +59,12 @@ def translate_expr(expression, type_name):
         try:
             assert expression.args[1].tag == type_name
         except (AssertionError, IndexError, AttributeError, TypeError):
-            raise UnsupportedError(
-                f"Unimplemented partial isa operation {expression}."
-            )
+            raise UnsupportedError(f"Unimplemented partial isa operation {expression}.")
 
         return None
     else:
-        raise UnsupportedError(
-            f"Unimplemented partial operator {expression.operator}"
-        )
+        raise UnsupportedError(f"Unimplemented partial operator {expression.operator}")
+
 
 def and_expr(expr, type_name):
     q = Q()
@@ -80,6 +78,7 @@ def and_expr(expr, type_name):
         q = q & expr
 
     return q
+
 
 def dot_op_field(expr):
     """Get the field from dot op ``expr`` or return ``False``."""

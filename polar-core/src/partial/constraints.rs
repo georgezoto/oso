@@ -122,7 +122,7 @@ impl Constraints {
         let name = match other.value() {
             Value::Partial(constraints) => constraints.name().clone(),
             Value::Variable(sym) => sym.clone(),
-            _ => panic!("Unexpected in LHS value, maybe you meant to call Constraints::contains()")
+            _ => panic!("Unexpected in LHS value, maybe you meant to call Constraints::contains()"),
         };
 
         let in_op = op!(In, term!(name.clone()), self.variable_term());
@@ -341,7 +341,6 @@ mod test {
             }
         };
     }
-
 
     macro_rules! assert_query_done {
         ($query:expr) => {
@@ -767,11 +766,13 @@ mod test {
     #[test]
     fn test_contains_partial() -> TestResult {
         let p = Polar::new();
-        p.load_str(r#"
+        p.load_str(
+            r#"
             contains(x, y) if x in y;
             contains_dot(x, y) if x in y.foo;
             contains_dot_dot(x, y) if x in y.foo.bar and y.foo = 2;
-        "#)?;
+        "#,
+        )?;
 
         let mut q = p.new_query_from_term(term!(call!("contains", [1, partial!("a")])), false);
         assert_partial_expression!(next_binding(&mut q)?, "a", "1 in _this");
@@ -781,8 +782,13 @@ mod test {
         assert_partial_expression!(next_binding(&mut q)?, "a", "1 in _this.foo");
         assert_query_done!(q);
 
-        let mut q = p.new_query_from_term(term!(call!("contains_dot_dot", [1, partial!("a")])), false);
-        assert_partial_expression!(next_binding(&mut q)?, "a", "1 in _this.foo.bar and _this.foo = 2");
+        let mut q =
+            p.new_query_from_term(term!(call!("contains_dot_dot", [1, partial!("a")])), false);
+        assert_partial_expression!(
+            next_binding(&mut q)?,
+            "a",
+            "1 in _this.foo.bar and _this.foo = 2"
+        );
         assert_query_done!(q);
 
         Ok(())
@@ -791,11 +797,13 @@ mod test {
     #[test]
     fn test_in_partial() -> TestResult {
         let p = Polar::new();
-        p.load_str(r#"
+        p.load_str(
+            r#"
             f(x) if y in x.values;
             g(x, y) if y in x.values;
             h(x) if y in x.values and (y.bar = 1 and y.baz = 2) or y.bar = 3;
-        "#)?;
+        "#,
+        )?;
 
         let mut q = p.new_query_from_term(term!(call!("f", [partial!("a")])), false);
         // TODO (dhatch): This doesn't work now, but ultimately this should have
