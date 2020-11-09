@@ -158,9 +158,8 @@ fn simplify_partial(mut term: Term) -> Term {
     }
 
     let mut partial_to_expr = PartialToExpression {};
-    let expression = partial_to_expr.fold_term(new);
 
-    expression
+    partial_to_expr.fold_term(new)
 }
 
 #[cfg(test)]
@@ -170,13 +169,18 @@ mod test {
 
     macro_rules! assert_expr_eq {
         ($left:expr, $right:expr) => {
-            assert_eq!(
-                $left.clone(),
-                $right.clone(),
-                "{} != {}",
-                $left.to_polar(),
-                $right.to_polar()
-            );
+            {
+                let left = $left;
+                let right = $right;
+
+                assert_eq!(
+                    left.clone(),
+                    right.clone(),
+                    "{} != {}",
+                    left.to_polar(),
+                    right.to_polar()
+                );
+            }
         };
     }
 
@@ -237,7 +241,7 @@ mod test {
         ));
 
         assert_expr_eq!(
-            simplify_partial(partial.clone()),
+            simplify_partial(partial),
             term!(op!(
                 And,
                 term!(op!(Eq, term!(3), term!(4))),
