@@ -168,20 +168,18 @@ mod test {
     use crate::terms::*;
 
     macro_rules! assert_expr_eq {
-        ($left:expr, $right:expr) => {
-            {
-                let left = $left;
-                let right = $right;
+        ($left:expr, $right:expr) => {{
+            let left = $left;
+            let right = $right;
 
-                assert_eq!(
-                    left.clone(),
-                    right.clone(),
-                    "{} != {}",
-                    left.to_polar(),
-                    right.to_polar()
-                );
-            }
-        };
+            assert_eq!(
+                left.clone(),
+                right.clone(),
+                "{} != {}",
+                left.to_polar(),
+                right.to_polar()
+            );
+        }};
     }
 
     #[test]
