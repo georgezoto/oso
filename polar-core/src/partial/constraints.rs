@@ -100,7 +100,7 @@ impl Constraints {
     /// Add a constraint that this must contain some known value.
     ///
     /// From OTHER in THIS where other is not a partial or variable.
-    pub fn contains(&mut self, other: Term) {
+    pub fn in_contains(&mut self, other: Term) {
         // TODO for now, this is represented as an in operation, but we may
         // want some other representation eventually.
         // TODO what about non-ground compound terms like [x, 1] in THIS
@@ -111,14 +111,14 @@ impl Constraints {
         self.add_constraint(in_op);
     }
 
-    /// Add a constraint that some non-ground value must be in this.
+    /// Add a constraint that a variable or partial value must be in this.
     ///
     /// `other` must be a partial or a variable.
     ///
     /// OTHER in THIS
     ///
     /// Returns: A new partial to use for additional constraints on `other`.
-    pub fn in_(&mut self, other: Term) -> Term {
+    pub fn in_unbound(&mut self, other: Term) -> Term {
         let name = match other.value() {
             Value::Partial(constraints) => constraints.name().clone(),
             Value::Variable(sym) => sym.clone(),

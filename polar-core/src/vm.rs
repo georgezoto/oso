@@ -1525,10 +1525,10 @@ impl PolarVirtualMachine {
                     Value::Partial(partial) => {
                         let mut partial = partial.clone();
                         if item.is_ground() {
-                            partial.contains(item);
+                            partial.in_contains(item);
                             self.bind(&partial.name().clone(), partial.into_term());
                         } else {
-                            let item_partial = partial.in_(item);
+                            let item_partial = partial.in_unbound(item);
                             self.bind(
                                 &item_partial.value().as_partial().unwrap().name().clone(),
                                 item_partial,
