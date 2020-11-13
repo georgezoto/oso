@@ -798,11 +798,9 @@ mod test {
     fn test_in_partial() -> TestResult {
         let p = Polar::new();
         p.load_str(
-            r#"
-            f(x) if y in x.values;
-            g(x, y) if y in x.values;
-            h(x) if y in x.values and (y.bar = 1 and y.baz = 2) or y.bar = 3;
-        "#,
+            r#"f(x) if y in x.values;
+               g(x, y) if y in x.values;
+               h(x) if y in x.values and (y.bar = 1 and y.baz = 2) or y.bar = 3;"#,
         )?;
 
         let mut q = p.new_query_from_term(term!(call!("f", [partial!("a")])), false);
