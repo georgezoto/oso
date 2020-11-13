@@ -120,7 +120,7 @@ impl Constraints {
         let name = match other.value() {
             Value::Partial(constraints) => constraints.name().clone(),
             Value::Variable(sym) => sym.clone(),
-            _ => panic!("Unexpected in LHS value, maybe you meant to call Constraints::contains()"),
+            _ => panic!("Unexpected in LHS value {:?}, maybe you meant to call Constraints::contains()", other.value()),
         };
 
         let in_op = op!(In, term!(name.clone()), self.variable_term());
