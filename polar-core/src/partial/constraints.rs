@@ -832,7 +832,6 @@ mod test {
             "a" => "(_this.bar = 1 and _this.baz = 2) in _this.values"
         );
 
-        // TODO (dhatch): Why is this an expression, but above is a partial?
         assert_partial_expressions!(
             next_binding(&mut q)?,
             "a" => "(_this.bar = 3) in _this.values"
