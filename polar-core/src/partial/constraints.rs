@@ -767,11 +767,9 @@ mod test {
     fn test_contains_partial() -> TestResult {
         let p = Polar::new();
         p.load_str(
-            r#"
-            contains(x, y) if x in y;
-            contains_dot(x, y) if x in y.foo;
-            contains_dot_dot(x, y) if x in y.foo.bar and y.foo = 2;
-        "#,
+            r#"contains(x, y) if x in y;
+               contains_dot(x, y) if x in y.foo;
+               contains_dot_dot(x, y) if x in y.foo.bar and y.foo = 2;"#,
         )?;
 
         let mut q = p.new_query_from_term(term!(call!("contains", [1, partial!("a")])), false);
